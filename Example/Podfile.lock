@@ -1,0 +1,16 @@
+PODS:
+  - shoprees46Test (0.1.0)
+
+DEPENDENCIES:
+  - shoprees46Test (from `../`)
+
+EXTERNAL SOURCES:
+  shoprees46Test:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  shoprees46Test: 8003c79153cacb20f183a96b184538e1a9c6c637
+
+PODFILE CHECKSUM: 7969d49e3b360cac8c48b22db0a4d4d7cfb6f90c
+
+COCOAPODS: 1.9.3

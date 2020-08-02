@@ -7,15 +7,68 @@
 //
 
 import UIKit
+import shoprees46Test
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    var sdk: PersonalizationSDK!
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        sdk = createPersonalizationSDK(shopId: "357382bf66ac0ce2f1722677c59511")
+        
+        print("1. Testing tracking")
+        sdk.track(event: .productView(id: "123")) { _ in
+            print("   Product view callback")
+        }
+        sdk.track(event: .categoryView(id: "123")) { _ in
+            print("   Category view callback")
+        }
+        sdk.track(event: .productAddedToFavorities(id: "123")) { _ in
+            print("   Product added to favorities callback")
+        }
+        sdk.track(event: .productRemovedToFavorities(id: "123")) { _ in
+            print("   Product removed from favorities callback")
+        }
+        sdk.track(event: .productAddedToCart(id: "123")) { _ in
+            print("   Product added to cart callback")
+        }
+        sdk.track(event: .productRemovedFromCart(id: "123")) { _ in
+            print("   Product removed from cart callback")
+        }
+        sdk.track(event: .syncronizeCart(ids: ["1", "2"])) { _ in
+            print("   Cart syncronized callback")
+        }
+        sdk.track(event: .orderCreated(orderId: "123", totalValue: 33.3, products: [(id: "1", amount: 3), (id: "2", amount: 1)])) { _ in
+            print("   Order created callback")
+        }
+
+        print("===")
+
+        print("2. Testing product recommendations")
+        sdk.recommend(blockId: "11118fd6807a70903de3553ad480e172", currentProductId: "1") { recomendResult in
+            print("   Recommendations requested callback")
+        }
+        print("===")
+
+        print("3. Testing search")
+        sdk.search(query: "iphone", searchType: .instant) { searchResult in
+            print("   Instant search callback")
+        }
+        sdk.search(query: "iphone", searchType: .full) { searchResult in
+            print("   Full search callback")
+        }
+        print("===")
+        
+        
+        print("4. Set user Settings")
+        
+        sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, bouthSmth: nil, location: nil, gender: .male) { (profileDataResp) in
+            print("     Profile data callback")
+        }
+        print("===")
         return true
     }
 
