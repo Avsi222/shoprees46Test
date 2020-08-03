@@ -24,7 +24,7 @@ pod 'shoprees46Test'
 ## Initialization
 
 ```swift
-var sdk = createPersonalizationSDK(shopId: "357382bf66ac0ce2f1722677c59511")
+var sdk = createPersonalizationSDK(shopId: "API_KEY")
 ```
 
 ## Track
