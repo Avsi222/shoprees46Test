@@ -30,30 +30,37 @@ The track method has next events:
 
 Params :
 id = String
+
 2) categoryView 
 
 Params :
 id = String
+
 3) productAddedToFavorities
 
 Params :
 id = String
+
 4) productRemovedToFavorities
 
 Params :
 id = String
+
 5) productAddedToCart
 
 Params :
 id = String
+
 6) productRemovedFromCart
 
 Params :
 id = String
+
 7) syncronizeCart
 
 Params :
 ids = [String]
+
 8) orderCreated
 
 Params :
