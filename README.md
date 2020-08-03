@@ -106,7 +106,7 @@ sdk.recommend(blockId: "block_id", currentProductId: "1") { recomendResult in
 
 Output:
 
-recomended = [Sting] - products ids array
+recomended = [Sting] - products ids array; 
 title = String - title block recomend
 
 ## Search
@@ -130,10 +130,10 @@ sdk.search(query: "iphone", searchType: .full) { searchResult in
 
 Output:
 
-categories = [Category]
-products =  [Product]
-productsTotal =  Int
-queries = [Query]
+categories = [Category]; 
+products =  [Product]; 
+productsTotal =  Int; 
+queries = [Query] .
 
 ## Author
 
