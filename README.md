@@ -25,28 +25,37 @@ pod 'shoprees46Test'
 ## Track
 Send track event to server.
 The track method has next events:
+
 1) productView
+
 Params :
 id = String
 2) categoryView 
+
 Params :
 id = String
 3) productAddedToFavorities
+
 Params :
 id = String
 4) productRemovedToFavorities
+
 Params :
 id = String
 5) productAddedToCart
+
 Params :
 id = String
 6) productRemovedFromCart
+
 Params :
 id = String
 7) syncronizeCart
+
 Params :
 ids = [String]
 8) orderCreated
+
 Params :
 orderId = String,
 totalValue = Double,
@@ -56,21 +65,27 @@ products = [
 
 ## Recommend
 Get recommends product ids.
+
 Input:
+
 blockId  = String
 productId = String
 
 Output:
+
 recomended = [Sting] - products ids array
 title = String - title block recomend
 
 ## Search
 Get search response for qeury in two statament ( partial search and full search)
+
 Input:
+
 query = String
 search type = SearchType
 
 Output:
+
 categories = [Category]
 products =  [Product]
 productsTotal =  Int
