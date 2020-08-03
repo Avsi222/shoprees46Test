@@ -139,6 +139,15 @@ products =  [Product];
 productsTotal =  Int; 
 queries = [Query] .
 
+## Set user data
+Send user data
+
+```swift
+sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, bouthSmth: nil, location: nil, gender: .male) { (profileDataResp) in
+      print("     Profile data callback")
+ }
+```
+
 ## Author
 
 Avsi222, «dorogin.arseniy@yandex.ru»
