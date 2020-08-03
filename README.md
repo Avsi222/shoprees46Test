@@ -21,6 +21,11 @@ pod 'shoprees46Test'
 ```
 
 # Usage
+## Initialization
+
+```swift
+var sdk = createPersonalizationSDK(shopId: "357382bf66ac0ce2f1722677c59511")
+```
 
 ## Track
 Send track event to server.
