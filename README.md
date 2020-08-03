@@ -24,6 +24,10 @@ pod 'shoprees46Test'
 ## Initialization
 
 ```swift
+
+import shoprees46Test
+
+.....
 var sdk = createPersonalizationSDK(shopId: "API_KEY")
 ```
 
