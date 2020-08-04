@@ -13,11 +13,21 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Installation
 
+## CocoaPods
+
 shoprees46Test is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
 pod 'shoprees46Test'
+```
+
+## Swift Package Manager
+
+To install click the upside menu 'File' -> 'Swift Packages' -> 'Add package dependency'. Next insert this url:
+
+```ruby
+https://github.com/Avsi222/shoprees46Test.git
 ```
 
 # Usage
@@ -107,6 +117,13 @@ sdk.track(event: .orderCreated(orderId: "123", totalValue: 33.3, products: [(id:
 
 ## Recommend
 Get recommends product ids.
+```swift
+sdk.recommend(blockId: "block_id") { recomendResult in
+    print("   Recommendations requested callback")
+}
+```
+
+Or
 
 ```swift
 sdk.recommend(blockId: "block_id", currentProductId: "1") { recomendResult in
@@ -149,7 +166,15 @@ queries = [Query] .
 Send user data
 
 ```swift
-sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, bouthSmth: nil, location: nil, gender: .male) { (profileDataResp) in
+sdk.setProfileData(userEmail: "email") { (profileDataResp) in
+      print("     Profile data callback")
+ }
+```
+
+Or 
+
+```swift
+sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, location: nil, gender: .male) { (profileDataResp) in
       print("     Profile data callback")
  }
 ```
