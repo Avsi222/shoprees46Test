@@ -31,6 +31,12 @@ import shoprees46Test
 var sdk = createPersonalizationSDK(shopId: "API_KEY")
 ```
 
+## Get session id
+
+```swift
+let ssid = sdk.getSSID()
+```
+
 ## Track
 Send track event to server.
 The track method has next events:
@@ -138,6 +144,15 @@ categories = [Category];
 products =  [Product]; 
 productsTotal =  Int; 
 queries = [Query] .
+
+## Set user data
+Send user data
+
+```swift
+sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, bouthSmth: nil, location: nil, gender: .male) { (profileDataResp) in
+      print("     Profile data callback")
+ }
+```
 
 ## Author
 
