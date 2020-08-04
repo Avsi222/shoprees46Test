@@ -1,7 +1,7 @@
 use_frameworks!
 
 target 'shoprees46Test_Example' do
-  pod 'shoprees46Test', :path => '../'
+  pod 'shoprees46Test', :path => '~/shoprees46Test'
 
   target 'shoprees46Test_Tests' do
     inherit! :search_paths

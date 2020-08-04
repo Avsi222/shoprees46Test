@@ -1,16 +1,16 @@
 PODS:
-  - shoprees46Test (0.1.0)
+  - shoprees46Test (0.0.2)
 
 DEPENDENCIES:
-  - shoprees46Test (from `../`)
+  - shoprees46Test (from `~/shoprees46Test`)
 
 EXTERNAL SOURCES:
   shoprees46Test:
-    :path: "../"
+    :path: "~/shoprees46Test"
 
 SPEC CHECKSUMS:
-  shoprees46Test: 8003c79153cacb20f183a96b184538e1a9c6c637
+  shoprees46Test: 6d3a3444560d00a498f607bbe2ad0590f5851551
 
-PODFILE CHECKSUM: 7969d49e3b360cac8c48b22db0a4d4d7cfb6f90c
+PODFILE CHECKSUM: eb8e65e9aaaa5c73a6cf9c001d65a8d3b3f61b55
 
 COCOAPODS: 1.9.3

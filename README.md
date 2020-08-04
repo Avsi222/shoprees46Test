@@ -21,60 +21,123 @@ pod 'shoprees46Test'
 ```
 
 # Usage
+## Initialization
+
+```swift
+
+import shoprees46Test
+
+.....
+var sdk = createPersonalizationSDK(shopId: "API_KEY")
+```
 
 ## Track
 Send track event to server.
 The track method has next events:
-1) productView
-Params :
-id = String
-2) categoryView 
-Params :
-id = String
-3) productAddedToFavorities
-Params :
-id = String
-4) productRemovedToFavorities
-Params :
-id = String
-5) productAddedToCart
-Params :
-id = String
-6) productRemovedFromCart
-Params :
-id = String
-7) syncronizeCart
-Params :
-ids = [String]
-8) orderCreated
-Params :
-orderId = String,
-totalValue = Double,
-products = [
-    ( id = String, amount = Int )
-] 
+
+1) Product view
+
+```swift
+sdk.track(event: .productView(id: "123")) { _ in
+      print("   Product view callback")
+}
+```
+
+2) Category View 
+
+```swift
+sdk.track(event: .categoryView(id: "123")) { _ in
+            print("   Category view callback")
+}
+```
+
+3) Product add to favorites
+
+```swift
+sdk.track(event: .productAddedToFavorities(id: "123")) { _ in
+            print("   Product added to favorities callback")
+}
+```
+
+4) Product remove from Favorites
+
+```swift
+sdk.track(event: .productRemovedToFavorities(id: "123")) { _ in
+            print("   Product removed from favorities callback")
+}
+```
+
+5) Product add to Cart
+
+```swift
+sdk.track(event: .productAddedToCart(id: "123")) { _ in
+    print("   Product added to cart callback")
+}
+```
+
+6) Product remove from cart
+
+```swift
+sdk.track(event: .productRemovedFromCart(id: "123")) { _ in
+    print("   Product removed from cart callback")
+}
+```
+
+7) Syncronize cart
+
+```swift
+sdk.track(event: .syncronizeCart(ids: ["1", "2"])) { _ in
+    print("   Cart syncronized callback")
+}
+```
+
+8) Create Order
+
+```swift
+sdk.track(event: .orderCreated(orderId: "123", totalValue: 33.3, products: [(id: "1", amount: 3), (id: "2", amount: 1)])) { _ in
+    print("   Order created callback")
+}
+```
 
 ## Recommend
 Get recommends product ids.
-Input:
-blockId  = String
-productId = String
+
+```swift
+sdk.recommend(blockId: "block_id", currentProductId: "1") { recomendResult in
+    print("   Recommendations requested callback")
+}
+```
 
 Output:
-recomended = [Sting] - products ids array
+
+recomended = [Sting] - products ids array; 
 title = String - title block recomend
 
 ## Search
 Get search response for qeury in two statament ( partial search and full search)
-Input:
-query = String
-search type = SearchType
+
+Partial search: 
+
+```swift
+sdk.search(query: "iphone", searchType: .instant) { searchResult in
+    print("   Instant search callback")
+}
+```
+
+Full search: 
+
+```swift
+sdk.search(query: "iphone", searchType: .full) { searchResult in
+    print("   Full search callback")
+}
+```
 
 Output:
-categories = [Category]
-products =  [Product]
-productsTotal =  Int
-queries = [Query]
+
+categories = [Category]; 
+products =  [Product]; 
+productsTotal =  Int; 
+queries = [Query] .
 
 ## Author
 

@@ -9,6 +9,7 @@
 import Foundation
 
 class SimplePersonaizationSDK: PersonalizationSDK {
+    
     var shopId: String
     var userSession: String
     var userSeance: String
@@ -22,167 +23,186 @@ class SimplePersonaizationSDK: PersonalizationSDK {
 
     var userInfo: InitResponse = InitResponse()
 
+    // Create a dispatch queue
+    let mySerialQueue = DispatchQueue(label: "myQueue", qos: .background)
+
+    // Create a semaphore
+    let semaphore = DispatchSemaphore(value: 0)
+
     init(shopId: String, userId: String? = nil, userEmail: String? = nil, userPhone: String? = nil, userLoyaltyId: String? = nil) {
         self.shopId = shopId
         // Generate seance
         userSeance = UUID().uuidString
-
         // Trying to fetch user session (permanent user ID)
         userSession = UserDefaults.standard.string(forKey: "personalization_ssid") ?? ""
 
         urlSession = URLSession.shared
-
-        self.sendInitRequest { initResult in
-            switch initResult {
-            case .success:
-                let res = try! initResult.get()
-                self.userInfo = res
-                self.userSeance = res.seance
-                self.userSession = res.ssid
-            case .failure:
-                // TODO: tell about failure
-                break
+        mySerialQueue.async {
+            self.sendInitRequest { initResult in
+                self.semaphore.signal()
+                switch initResult {
+                case .success:
+                    let res = try! initResult.get()
+                    self.userInfo = res
+                    self.userSeance = res.seance
+                    self.userSession = res.ssid
+                case .failure:
+                    print("SDK INIT FAIL")
+                    break
+                }
             }
+            self.semaphore.wait()
         }
     }
 
-    func setProfileData(userEmail: String?, userPhone: String?, userLoyaltyId: String?, birthday: Date?, age: String?, firstName: String?, secondName: String?, lastName: String?, bouthSmth: Bool?, location: String?, gender: Gender?, completion: @escaping (Result<Void, SDKError>) -> Void) {
-        let path = "push_attributes"
-        var birthdayString = ""
-        if let birthday = birthday {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "YYYY-MM-DD"
-            birthdayString = dateFormatter.string(from: birthday)
-        }
-        let params: [String: String] = [
-            "shop_id": shopId,
-            "ssid": userSession,
-            "seance": userSeance,
-            "attributes[id]": userId ?? "",
-            "attributes[gender]": gender == .male ? "m" : "f",
-            "attributes[birthday]": birthdayString,
-            "attributes[age]": age ?? "",
-            "attributes[email]": userEmail ?? "",
-            "attributes[first_name]": firstName ?? "",
-            "attributes[middle_name]": secondName ?? "",
-            "attributes[last_name]": lastName ?? "",
-            "attributes[phone]": userPhone ?? "",
-            "attributes[loyality_id]": userLoyaltyId ?? "",
-            "attributes[location]": location ?? "",
-            "attributes[bought_something]": (bouthSmth ?? false) ? "true" : "false",
-        ]
-
-        postRequest(path: path, params: params, completion: { result in
-            do {
-                let resJSON = try result.get()
-                let status = resJSON["status"] as! String
-                if status == "success" {
-                    completion(.success(Void()))
-                } else {
-                    completion(.failure(.responseError))
-                }
-            } catch {
-                completion(.failure(.initializationFailed))
+    func getSSID() -> String {
+        return userSession
+    }
+    
+    
+    func setProfileData(userEmail: String, userPhone: String?, userLoyaltyId: String?, birthday: Date?, age: String?, firstName: String?, secondName: String?, lastName: String?, location: String?, gender: Gender?, completion: @escaping (Result<Void, SDKError>) -> Void) {
+        mySerialQueue.async {
+            let path = "push_attributes"
+            var birthdayString = ""
+            if let birthday = birthday {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "YYYY-MM-DD"
+                birthdayString = dateFormatter.string(from: birthday)
             }
-        })
+            let params: [String: String] = [
+                "shop_id": self.shopId,
+                "ssid": self.userSession,
+                "seance": self.userSeance,
+                "attributes[id]": self.userId ?? "",
+                "attributes[gender]": gender == .male ? "m" : "f",
+                "attributes[birthday]": birthdayString,
+                "attributes[age]": age ?? "",
+                "attributes[email]": userEmail,
+                "attributes[first_name]": firstName ?? "",
+                "attributes[middle_name]": secondName ?? "",
+                "attributes[last_name]": lastName ?? "",
+                "attributes[phone]": userPhone ?? "",
+                "attributes[loyality_id]": userLoyaltyId ?? "",
+                "attributes[location]": location ?? "",
+            ]
+
+            self.postRequest(path: path, params: params, completion: { result in
+                do {
+                    let resJSON = try result.get()
+                    let status = resJSON["status"] as! String
+                    if status == "success" {
+                        completion(.success(Void()))
+                    } else {
+                        completion(.failure(.responseError))
+                    }
+                } catch {
+                    completion(.failure(.initializationFailed))
+                }
+            })
+        }
     }
 
     func track(event: Event, completion: @escaping (Result<Void, SDKError>) -> Void) {
-        let path = "push"
-        var paramEvent = ""
-        var params = [
-            "shop_id": shopId,
-            "ssid": userSession,
-            "seance": userSeance,
-        ]
-        switch event {
-        case let .categoryView(id):
-            params["item_id[0]"] = id
-            paramEvent = "category"
-        case let .productView(id):
-            params["item_id[0]"] = id
-            paramEvent = "view"
-        case let .productAddedToCart(id):
-            params["item_id[0]"] = id
-            paramEvent = "cart"
-        case let .productAddedToFavorities(id):
-            params["item_id[0]"] = id
-            paramEvent = "wish"
-        case let .productRemovedFromCart(id):
-            params["item_id[0]"] = id
-            paramEvent = "remove_from_cart"
-        case let .productRemovedToFavorities(id):
-            params["item_id[0]"] = id
-            paramEvent = "remove_wish"
-        case let .orderCreated(orderId, totalValue, products):
-            for (index, item) in products.enumerated() {
-                params["item_id[\(index)]"] = item.id
-                params["amount[\(index)]"] = "\(item.amount)"
-            }
-            params["order_id"] = orderId
-            params["total_value"] = "\(totalValue)"
-            paramEvent = "purchase"
-        case let .syncronizeCart(ids):
-            for (index, item) in ids.enumerated() {
-                params["item_id[\(index)]"] = item
-            }
-            paramEvent = "cart"
-        }
-        params["event"] = paramEvent
-
-        postRequest(path: path, params: params, completion: { result in
-            do {
-                let resJSON = try result.get()
-                let status = resJSON["status"] as! String
-                if status == "success" {
-                    completion(.success(Void()))
-                } else {
-                    completion(.failure(.responseError))
+        mySerialQueue.async {
+            let path = "push"
+            var paramEvent = ""
+            var params = [
+                "shop_id": self.shopId,
+                "ssid": self.userSession,
+                "seance": self.userSeance,
+            ]
+            switch event {
+            case let .categoryView(id):
+                params["item_id[0]"] = id
+                paramEvent = "category"
+            case let .productView(id):
+                params["item_id[0]"] = id
+                paramEvent = "view"
+            case let .productAddedToCart(id):
+                params["item_id[0]"] = id
+                paramEvent = "cart"
+            case let .productAddedToFavorities(id):
+                params["item_id[0]"] = id
+                paramEvent = "wish"
+            case let .productRemovedFromCart(id):
+                params["item_id[0]"] = id
+                paramEvent = "remove_from_cart"
+            case let .productRemovedToFavorities(id):
+                params["item_id[0]"] = id
+                paramEvent = "remove_wish"
+            case let .orderCreated(orderId, totalValue, products):
+                for (index, item) in products.enumerated() {
+                    params["item_id[\(index)]"] = item.id
+                    params["amount[\(index)]"] = "\(item.amount)"
                 }
-            } catch {
-                completion(.failure(.initializationFailed))
+                params["order_id"] = orderId
+                params["total_value"] = "\(totalValue)"
+                paramEvent = "purchase"
+            case let .syncronizeCart(ids):
+                for (index, item) in ids.enumerated() {
+                    params["item_id[\(index)]"] = item
+                }
+                paramEvent = "cart"
             }
-        })
+            params["event"] = paramEvent
+            self.postRequest(path: path, params: params, completion: { result in
+                do {
+                    let resJSON = try result.get()
+                    let status = resJSON["status"] as! String
+                    if status == "success" {
+                        completion(.success(Void()))
+                    } else {
+                        completion(.failure(.responseError))
+                    }
+                } catch {
+                    completion(.failure(.initializationFailed))
+                }
+            })
+        }
     }
 
     func recommend(blockId: String, currentProductId: String?, completion: @escaping (Result<RecommenderResponse, SDKError>) -> Void) {
-        let path = "recommend"
-        let params = [
-            "shop_id": shopId,
-            "ssid": userSession,
-            "seance": userSeance,
-            "recommender_type": "dynamic",
-            "recommender_code": blockId,
-            "segment": Bool.random() ? "A" : "B",
-        ]
+        mySerialQueue.async {
+            let path = "recommend"
+            let params = [
+                "shop_id": self.shopId,
+                "ssid": self.userSession,
+                "seance": self.userSeance,
+                "recommender_type": "dynamic",
+                "recommender_code": blockId,
+                "segment": Bool.random() ? "A" : "B",
+            ]
 
-        getRequest(path: path, params: params) { result in
-            do {
-                let resJSON = try result.get()
-                let resultResponse = RecommenderResponse(json: resJSON)
-                completion(.success(resultResponse))
-            } catch {
-                completion(.failure(.initializationFailed))
+            self.getRequest(path: path, params: params) { result in
+                do {
+                    let resJSON = try result.get()
+                    let resultResponse = RecommenderResponse(json: resJSON)
+                    completion(.success(resultResponse))
+                } catch {
+                    completion(.failure(.initializationFailed))
+                }
             }
         }
     }
 
     func search(query: String, searchType: SearchType, completion: @escaping (Result<SearchResponse, SDKError>) -> Void) {
-        let path = "search"
-        let params = [
-            "shop_id": shopId,
-            "ssid": userSession,
-            "seance": userSeance,
-            "type": searchType == .full ? "full_search" : "instant_search",
-            "search_query": query,
-        ]
-        getRequest(path: path, params: params) { result in
-            do {
-                let resJSON = try result.get()
-                let resultResponse = SearchResponse(json: resJSON)
-                completion(.success(resultResponse))
-            } catch {
-                completion(.failure(.initializationFailed))
+        mySerialQueue.async {
+            let path = "search"
+            let params = [
+                "shop_id": self.shopId,
+                "ssid": self.userSession,
+                "seance": self.userSeance,
+                "type": searchType == .full ? "full_search" : "instant_search",
+                "search_query": query,
+            ]
+            self.getRequest(path: path, params: params) { result in
+                do {
+                    let resJSON = try result.get()
+                    let resultResponse = SearchResponse(json: resJSON)
+                    completion(.success(resultResponse))
+                } catch {
+                    completion(.failure(.initializationFailed))
+                }
             }
         }
     }
@@ -249,7 +269,7 @@ class SimplePersonaizationSDK: PersonalizationSDK {
                     } catch {
                         completion(.failure(.decodeError))
                     }
-                case .failure(_):
+                case .failure:
                     completion(.failure(.invalidResponse))
                 }
             }.resume()
@@ -258,16 +278,14 @@ class SimplePersonaizationSDK: PersonalizationSDK {
         }
     }
 
-    
-
     private func postRequest(path: String, params: [String: String], completion: @escaping (Result<[String: Any], SDKError>) -> Void) {
         if let url = URL(string: baseURL + path) {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
-            let postString = self.getPostString(params: params)
+            let postString = getPostString(params: params)
             request.httpBody = postString.data(using: .utf8)
 
-            self.urlSession.postTask(with: request) { result in
+            urlSession.postTask(with: request) { result in
                 switch result {
                 case .success(let (response, data)):
                     guard let statusCode = (response as? HTTPURLResponse)?.statusCode, 200 ..< 299 ~= statusCode else {
@@ -284,7 +302,7 @@ class SimplePersonaizationSDK: PersonalizationSDK {
                     } catch {
                         completion(.failure(.decodeError))
                     }
-                case .failure(_):
+                case .failure:
                     completion(.failure(.invalidResponse))
                 }
             }.resume()
@@ -333,4 +351,3 @@ extension URLSession {
         }
     }
 }
-

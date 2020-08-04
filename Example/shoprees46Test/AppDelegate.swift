@@ -51,6 +51,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         sdk.recommend(blockId: "11118fd6807a70903de3553ad480e172", currentProductId: "1") { recomendResult in
             print("   Recommendations requested callback")
         }
+        
+        sdk.recommend(blockId: "11118fd6807a70903de3553ad480e172") { recomendResult in
+            print("   Recommendations requested callback")
+        }
+        
         print("===")
 
         print("3. Testing search")
@@ -65,9 +70,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         print("4. Set user Settings")
         
-        sdk.setProfileData(userEmail: "email", userPhone: "123", userLoyaltyId: "1", birthday: nil, age: nil, firstName: "Ars", secondName: "test", lastName: nil, bouthSmth: nil, location: nil, gender: .male) { (profileDataResp) in
-            print("     Profile data callback")
+        sdk.setProfileData(userEmail: "email") { (profileresponse) in
+            print("   Profile data set callback")
         }
+        
         print("===")
         return true
     }
